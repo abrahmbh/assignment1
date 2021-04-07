@@ -43,3 +43,30 @@ complete <- function(directory, id = 1:332){
   final_df <- data.frame(id, nobs)
   final_df
 }
+
+corr <- function(directory, threshold=0){
+  cr <- c()
+  # getting complete data information
+  thres_data <- complete(directory)
+  thres_data <- thres_data$id[thres_data$nobs>threshold]
+  #only find the correlation if we meet the threshold 
+  if(length(thres_data)>0){
+    files_list <- list.files(directory)
+    #empty dataframe for now. will bind with sensor data
+    cor_df <- data.frame()
+    for(i in thres_data){
+      temp_data <- read.csv(paste(directory, files_list[i], sep = "/"))
+      temp_sulf <- temp_data[, "sulfate"]
+      temp_nitr <- temp_data[, "nitrate"]
+      good <- complete.cases(temp_sulf, temp_nitr)
+      sulfate <- temp_sulf[good]
+      nitrate <-  temp_nitr[good]
+      cr <- c(cr, cor(sulfate, nitrate))
+    }
+    
+  }else{
+    cr <- c(0)
+  }
+  #returning cor data
+  cr
+}
